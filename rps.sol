@@ -2,14 +2,16 @@ pragma solidity ^0.5.11;
 
 contract rps {
     
+    enum Moves{ROCK, PAPER, SCISSORS}
+    
     struct Player {
         uint id;
         address payable addr;
-        uint choice; // 1 = Rock, 2 = Paper, 3 = Scissors
+        Moves choice;
     }
     
-    Player player1 = Player(1, 0xbDd5804F8eC5D4862C403aF6281caE11FC21f695, 1);
-    Player player2 = Player(2, 0x559Dbd861E393B359a55821FAc4b9eB75f42A337, 2);
+    Player player1 = Player(1, 0xbDd5804F8eC5D4862C403aF6281caE11FC21f695, Moves.ROCK);
+    Player player2 = Player(2, 0x559Dbd861E393B359a55821FAc4b9eB75f42A337, Moves.SCISSORS);
     
     function placeBet() external payable {}
     
@@ -25,14 +27,14 @@ contract rps {
             player2.addr.transfer(address(this).balance / 2);
         }
         
-        if (player1.choice == 1 && player2.choice == 2) {player2.addr.transfer(address(this).balance);}
-        if (player1.choice == 1 && player2.choice == 3) {player1.addr.transfer(address(this).balance);}
+        if (player1.choice == Moves.ROCK && player2.choice == Moves.PAPER) {player2.addr.transfer(address(this).balance);}
+        if (player1.choice == Moves.ROCK && player2.choice == Moves.SCISSORS) {player1.addr.transfer(address(this).balance);}
         
-        if (player1.choice == 2 && player2.choice == 1) {player1.addr.transfer(address(this).balance);}
-        if (player1.choice == 2 && player2.choice == 3) {player2.addr.transfer(address(this).balance);}
+        if (player1.choice == Moves.PAPER && player2.choice == Moves.ROCK) {player1.addr.transfer(address(this).balance);}
+        if (player1.choice == Moves.PAPER && player2.choice == Moves.SCISSORS) {player2.addr.transfer(address(this).balance);}
         
-        if (player1.choice == 3 && player2.choice == 1) {player2.addr.transfer(address(this).balance);}
-        if (player1.choice == 3 && player2.choice == 2) {player1.addr.transfer(address(this).balance);}
+        if (player1.choice == Moves.SCISSORS && player2.choice == Moves.ROCK) {player2.addr.transfer(address(this).balance);}
+        if (player1.choice == Moves.SCISSORS && player2.choice == Moves.PAPER) {player1.addr.transfer(address(this).balance);}
         
         else {
             player1.addr.transfer(address(this).balance / 2);
