@@ -21,7 +21,7 @@ contract rps {
     Game game;
     
     function placeBet(uint _wager, address payable _address1, address payable _address2) external payable {
-        if (_address2.balance >= msg.value) { // Check if Player 2 has enough money to place the same bet as player 1.
+        if (_address1.balance >= _wager && _address2.balance >= _wager) { // Check if both players have enough money to place the bet.
             game = Game(
             _wager,
             Player(1, _address1, Moves.ROCK),
