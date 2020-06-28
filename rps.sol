@@ -20,10 +20,10 @@ contract rps {
     
     Game game;
     
-    function placeBet(address payable _address1, address payable _address2) external payable {
+    function placeBet(uint _wager, address payable _address1, address payable _address2) external payable {
         if (_address2.balance >= msg.value) { // Check if Player 2 has enough money to place the same bet as player 1.
             game = Game(
-            msg.value,
+            _wager,
             Player(1, _address1, Moves.ROCK),
             Player(2, _address2, Moves.SCISSORS),
             false, // Game just started so game.isOver = false
@@ -32,8 +32,8 @@ contract rps {
         }
     }
     
-    function viewBet() external view returns(uint) {
-        return game.wager;
+    function viewPot() external view returns(uint) {
+        return address(this).balance;
     }
     
     function play() external {
