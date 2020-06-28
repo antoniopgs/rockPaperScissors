@@ -14,37 +14,53 @@ contract rps {
         uint wager;
         Player player1;
         Player player2;
+        bool isOver;
+        uint winnerId;
     }
     
-    Player player1 = Player(1, 0xbDd5804F8eC5D4862C403aF6281caE11FC21f695, Moves.ROCK);
-    Player player2 = Player(2, 0x559Dbd861E393B359a55821FAc4b9eB75f42A337, Moves.SCISSORS);
+    Game game;
     
-    function placeBet() external payable {}
+    function placeBet() external payable {
+        game = Game(
+            msg.value,
+            Player(1, msg.sender, Moves.ROCK),
+            Player(2, 0xdD870fA1b7C4700F2BD7f44238821C26f7392148, Moves.SCISSORS),
+            false, // Game just started so game.isOver = false
+            0 // Winner hasn't been determined yet so game.winner = 0
+            );
+    }
     
     function viewBet() external view returns(uint) {
         return address(this).balance;
     }
     
     function play() external payable returns(string memory) {
+        // If there is a Tie or Invalid Inputs, game.winner remains = 0
         
-        // If Tie:
-        if (player1.choice == player2.choice) {
-            player1.addr.transfer(address(this).balance / 2);
-            player2.addr.transfer(address(this).balance / 2);
-        }
+        if (game.player1.choice == Moves.ROCK && game.player2.choice == Moves.PAPER) {game.winnerId = game.player2.id;}
+        if (game.player1.choice == Moves.ROCK && game.player2.choice == Moves.SCISSORS) {game.winnerId = game.player1.id;}
         
-        if (player1.choice == Moves.ROCK && player2.choice == Moves.PAPER) {player2.addr.transfer(address(this).balance);}
-        if (player1.choice == Moves.ROCK && player2.choice == Moves.SCISSORS) {player1.addr.transfer(address(this).balance);}
+        if (game.player1.choice == Moves.PAPER && game.player2.choice == Moves.ROCK) {game.winnerId = game.player1.id;}
+        if (game.player1.choice == Moves.PAPER && game.player2.choice == Moves.SCISSORS) {game.winnerId = game.player2.id;}
         
-        if (player1.choice == Moves.PAPER && player2.choice == Moves.ROCK) {player1.addr.transfer(address(this).balance);}
-        if (player1.choice == Moves.PAPER && player2.choice == Moves.SCISSORS) {player2.addr.transfer(address(this).balance);}
+        if (game.player1.choice == Moves.SCISSORS && game.player2.choice == Moves.ROCK) {game.winnerId = game.player2.id;}
+        if (game.player1.choice == Moves.SCISSORS && game.player2.choice == Moves.PAPER) {game.winnerId = game.player1.id;}
         
-        if (player1.choice == Moves.SCISSORS && player2.choice == Moves.ROCK) {player2.addr.transfer(address(this).balance);}
-        if (player1.choice == Moves.SCISSORS && player2.choice == Moves.PAPER) {player1.addr.transfer(address(this).balance);}
+        game.isOver = true;
         
-        else {
-            player1.addr.transfer(address(this).balance / 2);
-            player2.addr.transfer(address(this).balance / 2);
+        sendWei();
+    }
+    
+    function sendWei() internal {
+        if (game.isOver) {
+            if (game.winnerId == 0) {
+                game.player1.addr.transfer(address(this).balance / 2);
+                game.player2.addr.transfer(address(this).balance / 2);
+            } else if (game.winnerId == 1) {
+                game.player1.addr.transfer(address(this).balance);
+            } else if (game.winnerId == 2) {
+                game.player2.addr.transfer(address(this).balance);
+            }
         }
     }
 }
