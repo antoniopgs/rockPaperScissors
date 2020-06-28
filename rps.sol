@@ -36,7 +36,7 @@ contract rps {
     }
     
     function viewPot() external view returns(uint) {
-        address(this).balance;
+        return address(this).balance;
     }
     
     function play(Moves _choice) external {
