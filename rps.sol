@@ -10,6 +10,12 @@ contract rps {
         Moves choice;
     }
     
+    struct Game {
+        uint wager;
+        Player player1;
+        Player player2;
+    }
+    
     Player player1 = Player(1, 0xbDd5804F8eC5D4862C403aF6281caE11FC21f695, Moves.ROCK);
     Player player2 = Player(2, 0x559Dbd861E393B359a55821FAc4b9eB75f42A337, Moves.SCISSORS);
     
