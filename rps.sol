@@ -20,16 +20,18 @@ contract rps {
     
     Game game;
     
-    function placeBet() external payable {
-        game = Game(
+    function placeBet(address payable _address1, address payable _address2) external payable {
+        if (_address2.balance >= msg.value) { // Check if Player 2 has enough money to place the same bet as player 1.
+            game = Game(
             msg.value,
-            Player(1, 0x583031D1113aD414F02576BD6afaBfb302140225, Moves.ROCK),
-            Player(2, 0xdD870fA1b7C4700F2BD7f44238821C26f7392148, Moves.SCISSORS),
+            Player(1, _address1, Moves.ROCK),
+            Player(2, _address2, Moves.SCISSORS),
             false, // Game just started so game.isOver = false
             0 // Winner hasn't been determined yet so game.winner = 0
             );
+        }
     }
-
+    
     function viewBet() external view returns(uint) {
         return game.wager;
     }
