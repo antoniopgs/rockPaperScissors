@@ -76,17 +76,16 @@ contract rps {
     }
     
     function sendWei() internal {
-        if (gameIsOver == true) {
-            if (winner.id == 0) {
-                players[0].addr.transfer(address(this).balance / 2);
-                players[1].addr.transfer(address(this).balance / 2);
-            }
-            else if (winner.id == players[0].id) {
-                players[0].addr.transfer(address(this).balance);
-            }
-            else if (winner.id == players[1].id) {
-                players[1].addr.transfer(address(this).balance);
-            }
+        require(gameIsOver == true);
+        if (winner.id == 0) {
+            players[0].addr.transfer(address(this).balance / 2);
+            players[1].addr.transfer(address(this).balance / 2);
+        }
+        else if (winner.id == players[0].id) {
+            players[0].addr.transfer(address(this).balance);
+        }
+        else if (winner.id == players[1].id) {
+            players[1].addr.transfer(address(this).balance);
         }
     }
 }
