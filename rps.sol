@@ -34,7 +34,7 @@ contract rps {
         return game.wager;
     }
     
-    function play() external payable returns(string memory) {
+    function play() external {
         // If there is a Tie or Invalid Inputs, game.winner remains = 0
         
         if (game.player1.choice == Moves.ROCK && game.player2.choice == Moves.PAPER) {game.winnerId = game.player2.id;}
