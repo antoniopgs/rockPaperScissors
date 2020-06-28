@@ -23,15 +23,15 @@ contract rps {
     function placeBet() external payable {
         game = Game(
             msg.value,
-            Player(1, msg.sender, Moves.ROCK),
+            Player(1, 0x583031D1113aD414F02576BD6afaBfb302140225, Moves.ROCK),
             Player(2, 0xdD870fA1b7C4700F2BD7f44238821C26f7392148, Moves.SCISSORS),
             false, // Game just started so game.isOver = false
             0 // Winner hasn't been determined yet so game.winner = 0
             );
     }
-    
+
     function viewBet() external view returns(uint) {
-        return address(this).balance;
+        return game.wager;
     }
     
     function play() external payable returns(string memory) {
@@ -52,7 +52,7 @@ contract rps {
     }
     
     function sendWei() internal {
-        if (game.isOver) {
+        if (game.isOver == true) {
             if (game.winnerId == 0) {
                 game.player1.addr.transfer(address(this).balance / 2);
                 game.player2.addr.transfer(address(this).balance / 2);
