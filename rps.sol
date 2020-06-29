@@ -7,7 +7,7 @@ contract rps {
     
     struct Player {
         uint id;
-        address addr;
+        address payable addr;
         Moves choice;
     }
     
@@ -53,35 +53,28 @@ contract rps {
         }
         
         // Both Players must pick their move for the winner to be declared:
-        if (players[0].choice == Moves.ROCK || players[0].choice == Moves.PAPER || players[0].choice == Moves.SCISSORS &&
-            players[1].choice == Moves.ROCK || players[1].choice == Moves.PAPER || players[1].choice == Moves.SCISSORS) {
+        if (players[0].choice != Moves.NONE && players[1].choice != Moves.NONE) {
             getWinner();
         }
     }
     
-    function getWinner() internal returns(address) {
-        if (players[0].choice == players[1].choice) {return 0x0000000000000000000000000000000000000000;} // If it's a tie.
+    function getWinner() internal {
+        if (players[0].choice == players[1].choice) { // If it's a tie.
+            players[0].addr.transfer(wager);
+            players[1].addr.transfer(wager);
+        }
         
-        else if (players[0].choice == Moves.ROCK && players[1].choice == Moves.PAPER) {return players[1].addr;}
-        else if (players[0].choice == Moves.ROCK && players[1].choice == Moves.SCISSORS) {return players[0].addr;}
+        else if (players[0].choice == Moves.ROCK && players[1].choice == Moves.PAPER) {payWinner(players[1].addr);}
+        else if (players[0].choice == Moves.ROCK && players[1].choice == Moves.SCISSORS) {payWinner(players[0].addr);}
         
-        else if (players[0].choice == Moves.PAPER && players[1].choice == Moves.ROCK) {return players[0].addr;}
-        else if (players[0].choice == Moves.PAPER && players[1].choice == Moves.SCISSORS) {return players[1].addr;}
+        else if (players[0].choice == Moves.PAPER && players[1].choice == Moves.ROCK) {payWinner(players[0].addr);}
+        else if (players[0].choice == Moves.PAPER && players[1].choice == Moves.SCISSORS) {payWinner(players[1].addr);}
         
-        else if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.ROCK) {return players[1].addr;}
-        else if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.PAPER) {return players[0].addr;}
-        
-        sendWei();
+        else if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.ROCK) {payWinner(players[1].addr);}
+        else if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.PAPER) {payWinner(players[0].addr);}
     }
     
-    function sendWei() internal {
-        address payable winner = address(uint(getWinner()));
-        if (winner == 0x0000000000000000000000000000000000000000) {
-            winner.transfer(address(this).balance / 2);
-            winner.transfer(address(this).balance / 2);
-        }
-        else {
-            winner.transfer(address(this).balance);
-        }
+    function payWinner(address payable _winner) internal {
+            _winner.transfer(address(this).balance);
     }
 }
