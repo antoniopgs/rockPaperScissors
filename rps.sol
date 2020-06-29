@@ -11,7 +11,7 @@ contract rps {
         Moves choice;
     }
     
-    uint wager;
+    uint public wager;
     Player[2] players;
     
     function placeBet() external payable {
@@ -75,6 +75,6 @@ contract rps {
     }
     
     function payWinner(address payable _winner) internal {
-            _winner.transfer(address(this).balance);
+            _winner.transfer( address(this).balance - (address(this).balance / 100) ); // 1% Fee
     }
 }
