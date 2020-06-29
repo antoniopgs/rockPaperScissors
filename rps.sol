@@ -2,6 +2,8 @@
 pragma solidity >=0.5.10 <0.7.0;
 
 contract rps {
+
+    address payable constant admin = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
     
     enum Moves{NONE, ROCK, PAPER, SCISSORS}
     
@@ -13,7 +15,6 @@ contract rps {
     
     uint public wager;
     Player[2] players;
-    address payable constant admin = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
     
     function placeBet() external payable {
         require(msg.value > 0, "Player must bet a positive amount");
