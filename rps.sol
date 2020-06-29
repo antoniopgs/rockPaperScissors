@@ -13,6 +13,7 @@ contract rps {
     
     uint public wager;
     Player[2] players;
+    address payable constant admin = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
     
     function placeBet() external payable {
         require(msg.value > 0, "Player must bet a positive amount");
@@ -76,5 +77,6 @@ contract rps {
     
     function payWinner(address payable _winner) internal {
             _winner.transfer( address(this).balance - (address(this).balance / 100) ); // 1% Fee
+            admin.transfer(address(this).balance);
     }
 }
