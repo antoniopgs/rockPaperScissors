@@ -7,17 +7,15 @@ contract rps {
     
     struct Player {
         uint id;
-        address payable addr;
+        address addr;
         Moves choice;
     }
     
     uint wager;
     Player[2] players;
-    bool gameIsOver;
-    Player winner;
     
     function placeBet() external payable {
-        require(msg.value > 0, "Players must bet a positive amount");
+        require(msg.value > 0, "Player must bet a positive amount");
         
         if (wager == 0) { // If wager = 0 it's because it hasn't bet set yet. 1st Player will set the wager.
             require(players[0].id == 0 && players[1].id == 0, "There must be no Preexisting players");
@@ -27,10 +25,10 @@ contract rps {
         }
         
         else { // If wager != 0 there is already a wager set by the 1st Player. The 2nd player must match.
-            require(msg.value == wager, "Second Player must match First Player's bet");
-            require(msg.sender != players[0].addr, "Second Player must be different than First Player");
-            require(players[0].id != 0, "There must be a Preexisting 1st Player");
+            require(players[0].id == 1, "There must be a Preexisting 1st Player");
             require(players[1].id == 0, "There must be no Preexisting 2nd Player");
+            require(msg.sender != players[0].addr, "2nd Player must be different than 1st Player");
+            require(msg.value == wager, "2nd Player must match 1st Player's bet");
             
             players[1] = Player(2, msg.sender, Moves.NONE); // Add 2nd player.
         }
@@ -40,53 +38,50 @@ contract rps {
         return address(this).balance;
     }
     
-    function play(Moves _choice) external {
-        require(
-        msg.sender == players[0].addr && players[0].choice == Moves.NONE
-        ||
-        msg.sender == players[1].addr && players[1].choice == Moves.NONE,
-        "Only authorized players with no previous moves can choose a move"
-        );
+    function pickMove(Moves _choice) external {
+        require(players[0].id == 1 && players[1].id == 2, "There must exist two authorized players");
+        require(msg.sender == players[0].addr && players[0].choice == Moves.NONE ||
+                msg.sender == players[1].addr && players[1].choice == Moves.NONE,
+                "Only authorized players with no previous moves can pick a move");
         
-        require(_choice == Moves.ROCK || _choice == Moves.PAPER || _choice == Moves.SCISSORS, "Player must choose a valid move");
+        require(_choice == Moves.ROCK || _choice == Moves.PAPER || _choice == Moves.SCISSORS, "Player must pick a valid move");
         
         if (msg.sender == players[0].addr) {
             players[0].choice = _choice;
-        }
-        else if (msg.sender == players[1].addr) {
+        } else if (msg.sender == players[1].addr) {
             players[1].choice = _choice;
         }
-        else {
-            revert("Sender must be an authorized player");
+        
+        // Both Players must pick their move for the winner to be declared:
+        if (players[0].choice == Moves.ROCK || players[0].choice == Moves.PAPER || players[0].choice == Moves.SCISSORS &&
+            players[1].choice == Moves.ROCK || players[1].choice == Moves.PAPER || players[1].choice == Moves.SCISSORS) {
+            getWinner();
         }
+    }
+    
+    function getWinner() internal returns(address) {
+        if (players[0].choice == players[1].choice) {return 0x0000000000000000000000000000000000000000;} // If it's a tie.
         
-        // If there is a Tie or Invalid Inputs, game.winner remains = 0
+        else if (players[0].choice == Moves.ROCK && players[1].choice == Moves.PAPER) {return players[1].addr;}
+        else if (players[0].choice == Moves.ROCK && players[1].choice == Moves.SCISSORS) {return players[0].addr;}
         
-        if (players[0].choice == Moves.ROCK && players[1].choice == Moves.PAPER) {winner = players[1];}
-        if (players[0].choice == Moves.ROCK && players[1].choice == Moves.SCISSORS) {winner = players[0];}
+        else if (players[0].choice == Moves.PAPER && players[1].choice == Moves.ROCK) {return players[0].addr;}
+        else if (players[0].choice == Moves.PAPER && players[1].choice == Moves.SCISSORS) {return players[1].addr;}
         
-        if (players[0].choice == Moves.PAPER && players[1].choice == Moves.ROCK) {winner = players[0];}
-        if (players[0].choice == Moves.PAPER && players[1].choice == Moves.SCISSORS) {winner = players[1];}
-        
-        if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.ROCK) {winner = players[1];}
-        if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.PAPER) {winner = players[0];}
-        
-        gameIsOver = true;
+        else if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.ROCK) {return players[1].addr;}
+        else if (players[0].choice == Moves.SCISSORS && players[1].choice == Moves.PAPER) {return players[0].addr;}
         
         sendWei();
     }
     
     function sendWei() internal {
-        require(gameIsOver == true);
-        if (winner.id == 0) {
-            players[0].addr.transfer(address(this).balance / 2);
-            players[1].addr.transfer(address(this).balance / 2);
+        address payable winner = address(uint(getWinner()));
+        if (winner == 0x0000000000000000000000000000000000000000) {
+            winner.transfer(address(this).balance / 2);
+            winner.transfer(address(this).balance / 2);
         }
-        else if (winner.id == players[0].id) {
-            players[0].addr.transfer(address(this).balance);
-        }
-        else if (winner.id == players[1].id) {
-            players[1].addr.transfer(address(this).balance);
+        else {
+            winner.transfer(address(this).balance);
         }
     }
 }
