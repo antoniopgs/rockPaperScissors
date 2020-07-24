@@ -1,51 +1,45 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.5.10 <0.7.0;
 
-contract rps {
+contract RockPaperScissors {
 
     address payable constant admin = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
     
     enum Moves{NONE, ROCK, PAPER, SCISSORS}
     
     struct Player {
-        uint id;
         address payable addr;
         Moves choice;
     }
     
-    uint public wager;
     Player[2] players;
     
-    function placeBet() external payable {
-        require(msg.value > 0, "Player must bet a positive amount");
-        
-        if (wager == 0) { // If wager = 0 it's because it hasn't bet set yet. 1st Player will set the wager.
-            require(players[0].id == 0 && players[1].id == 0, "There must be no Preexisting players");
-            
-            wager = msg.value; // Set wager.
-            players[0] = Player(1, msg.sender, Moves.NONE); // Add 1st Player.
-        }
-        
-        else { // If wager != 0 there is already a wager set by the 1st Player. The 2nd player must match.
-            require(players[0].id == 1, "There must be a Preexisting 1st Player");
-            require(players[1].id == 0, "There must be no Preexisting 2nd Player");
-            require(msg.sender != players[0].addr, "2nd Player must be different than 1st Player");
-            require(msg.value == wager, "2nd Player must match 1st Player's bet");
-            
-            players[1] = Player(2, msg.sender, Moves.NONE); // Add 2nd player.
-        }
+    constructor() public payable {
+        require(msg.value > 0, "Player 1 must bet a positive amount");
+        assert(
+            players[0].addr == 0x0000000000000000000000000000000000000000 && 
+            players[1].addr == 0x0000000000000000000000000000000000000000
+        ); // There must be no Preexisting players
+        players[0] = Player(msg.sender, Moves.NONE); // Add Player 1
     }
     
-    function viewPot() external view returns(uint) {
-        return address(this).balance;
+    function matchBet() external payable {
+        require(players[1].addr == 0x0000000000000000000000000000000000000000, "There must be no preexisting Player 2");
+        require(msg.sender != players[0].addr, "Player 1 can't match his own bet.");
+        require(msg.value == address(this).balance, "Player 2 must match Player 1's bet");
+        assert(players[0].addr != 0x0000000000000000000000000000000000000000); // There must be a preexisting Player 1
+        players[1] = Player(msg.sender, Moves.NONE); // Add Player 2
     }
     
     function pickMove(Moves _choice) external {
-        require(players[0].id == 1 && players[1].id == 2, "There must exist two authorized players");
+        require(
+            players[0].addr != 0x0000000000000000000000000000000000000000 && 
+            players[1].addr != 0x0000000000000000000000000000000000000000, 
+            "There must exist two authorized players"
+            );
         require(msg.sender == players[0].addr && players[0].choice == Moves.NONE ||
                 msg.sender == players[1].addr && players[1].choice == Moves.NONE,
                 "Only authorized players with no previous moves can pick a move");
-        
         require(_choice == Moves.ROCK || _choice == Moves.PAPER || _choice == Moves.SCISSORS, "Player must pick a valid move");
         
         if (msg.sender == players[0].addr) {
@@ -54,7 +48,7 @@ contract rps {
             players[1].choice = _choice;
         }
         
-        // Both Players must pick their move for the winner to be declared:
+        // If both players have picked a move, declare the winner:
         if (players[0].choice != Moves.NONE && players[1].choice != Moves.NONE) {
             getWinner();
         }
@@ -62,8 +56,8 @@ contract rps {
     
     function getWinner() internal {
         if (players[0].choice == players[1].choice) { // If it's a tie.
-            players[0].addr.transfer(wager);
-            players[1].addr.transfer(wager);
+            players[0].addr.transfer(address(this).balance / 2);
+            players[1].addr.transfer(address(this).balance);
         }
         
         else if (players[0].choice == Moves.ROCK && players[1].choice == Moves.PAPER) {payWinner(players[1].addr);}
