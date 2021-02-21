@@ -53,7 +53,7 @@ contract RockPaperScissors {
         // If no bet was placed
         if (bet == 0) {
             require(msg.value > 0, "Player must set a bet with a positive amount");
-            bet == msg.value;
+            bet = msg.value;
             
         // If a bet was already placed
         } else {
