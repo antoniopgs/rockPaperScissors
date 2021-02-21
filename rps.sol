@@ -85,9 +85,8 @@ contract RockPaperScissors {
         }
     }
     
-    
     // Reveal
-    function reveal(string calldata move, string calldata salt) external {
+    function reveal(Moves move, string calldata salt) external {
         
         // Validate both players have committed
         require(players[0].commit != 0 && players[1].commit != 0, "Can only reveal after both players commit");
@@ -99,12 +98,7 @@ contract RockPaperScissors {
         if (block.timestamp < revealDeadline) {
             
             // Ensure input hashes to a valid move
-            require(
-                hashMatch(move, "rock") || 
-                hashMatch(move, "paper") || 
-                hashMatch(move, "scissors"), 
-                "move must be rock, paper or scissors."
-            );
+            require(move == Moves.ROCK || move == Moves.PAPER || move == Moves.SCISSORS, "move must be rock, paper or scissors.");
             
             // Set Reveal Hash
             bytes32 revealHash = keccak256(abi.encodePacked(move, salt));
@@ -170,14 +164,14 @@ contract RockPaperScissors {
         _winner.transfer(address(this).balance);
     }
     
-    function validateReveal(bytes32 inputHash, Player storage player, string memory _move) internal {
+    function validateReveal(bytes32 inputHash, Player storage player, Moves move) internal {
         
         // To Reveal, player must have not revealed before (have no move)
         require(player.move == Moves.NONE, "You already revealed");
     
         // If reveal is valid
         if (inputHash == player.commit) {
-            player.move = strToMove(_move);
+            player.move = move;
         }
         
         // If reveal is not valid
@@ -215,28 +209,10 @@ contract RockPaperScissors {
         payable(msg.sender).transfer(bet);
     }
     
-    function hash(string memory input) internal pure returns(bytes32) {
-        return keccak256(abi.encodePacked(input));
-    }
-    
-    function hashMatch(string memory input1, string memory input2) internal pure returns(bool) {
-        if (hash(input1) == hash(input2)) {return true;}
-        else {return false;}
-    }
-    
-    // Convert move strings into "Moves" Enum values
-    function strToMove(string memory input) internal pure returns(Moves) {
-        if (hashMatch(input, "rock")) {return Moves.ROCK;}
-        else if (hashMatch(input, "paper")) {return Moves.PAPER;}
-        else if (hashMatch(input, "scissors")) {return Moves.SCISSORS;}
-        else {revert("Invalid move");}
-    }
-    
     // Anyone can view Bet
     function viewBet() external view returns(uint) {
         return bet;
     }
-    
     
     // Anyone can view time left until Commit Deadline
     function viewCommitSecondsLeft() external view returns(uint) {
