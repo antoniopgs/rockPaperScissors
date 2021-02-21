@@ -92,7 +92,7 @@ contract RockPaperScissors {
         // Validate both players have committed
         require(players[0].commit != 0 && players[1].commit != 0, "Can only reveal after both players commit");
         
-        // Validate it's a valid player
+        // Ensure it's a valid player
         require(msg.sender == players[0].addr || msg.sender == players[1].addr, "Only valid players can reveal.");
         
         // If the Reveal Phase is not over
@@ -130,6 +130,7 @@ contract RockPaperScissors {
             
         // If the Reveal Phase is over
         } else {
+            
             /*
                 Either player can call getWinner() to get their money
                 getWinner() is prepared in case one or more players don't reveal
@@ -183,13 +184,35 @@ contract RockPaperScissors {
         else {revert("Move and Salt do not match your Commit");}
     }
     
-    // If no Player 2 commits until commit phase is over, Player 1 can get refund
-    function refundPlayer1() external {
-        require(msg.sender == players[0].addr, "Only Player 1 can get a refund");
+    // If only one Player commits, he can get a refund when commit phase is over
+    function getRefund() external {
+        require(msg.sender == players[0].addr || msg.sender == players[1].addr, "Only valid players can get a refund");
         require (block.timestamp > commitDeadline, "You cannot get a refund until the commit phase is over");
-        require(players[1].addr == address(0), "No refunds if Player 2 exists. Wait until end of Reveal Phase");
-        assert(address(this).balance == bet); // Contract balance should be equal to bet.
-        players[0].addr.transfer(bet);
+        
+        // If Player 1 wants a refund
+        if (msg.sender == players[0].addr) {
+            
+            // Ensure Player 1 has committed
+            require(players[0].commit != 0, "You have not committed. Refund unauthorized.");
+            
+            // Ensure Player 2 has not committed
+            require(players[1].commit == 0, "Player 2 has committed. Refund unauthorized.");
+        
+        // If Player 2 wants a refund
+        } else if (msg.sender == players[1].addr) {
+            
+            // Ensure Player 2 has committed
+            require(players[1].commit != 0, "You have not committed. Refund unauthorized.");
+            
+            // Ensure Player 1 has not committed
+            require(players[0].commit == 0, "Player 1 has committed. Refund unauthorized.");
+        }
+        
+        // If only one Player has committed, contract balance should equal bet
+        assert(address(this).balance == bet);
+        
+        // Refund Player
+        payable(msg.sender).transfer(bet);
     }
     
     function hash(string memory input) internal pure returns(bytes32) {
