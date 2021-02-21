@@ -92,7 +92,7 @@ contract RockPaperScissors {
             else if (msg.sender == players[1].addr) {
                 
                 // Player 1 must revealed, or at least committed
-                require(players[1].status == Status.REVEALED || players[1].status == Status.COMMITED);
+                require(players[0].status == Status.REVEALED || players[0].status == Status.COMMITED);
                 
                 // Validate Player 2 reveal
                 validateReveal(revealHash, players[1], move);
