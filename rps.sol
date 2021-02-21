@@ -101,7 +101,7 @@ contract RockPaperScissors {
             require(move == Moves.ROCK || move == Moves.PAPER || move == Moves.SCISSORS, "move must be rock, paper or scissors.");
             
             // Set Reveal Hash
-            bytes32 revealHash = keccak256(abi.encodePacked(move, salt));
+            bytes32 revealHash = keccak256(abi.encodePacked(enumToStr(move), salt));
             
             // If it's Player 1
             if (msg.sender == players[0].addr) {
@@ -162,6 +162,14 @@ contract RockPaperScissors {
     function payWinner(address payable _winner) internal {
         admin.transfer(address(this).balance / 100); // admin gets 1% fee
         _winner.transfer(address(this).balance);
+    }
+    
+    // Transform enums to strings, to facilitate revealHash calculation
+    function enumToStr(Moves move) internal pure returns(string memory) {
+        if (move == Moves.ROCK) {return "1";}
+        else if (move == Moves.PAPER) {return "2";}
+        else if (move == Moves.SCISSORS) {return "3";}
+        else revert("Invalid move");
     }
     
     function validateReveal(bytes32 inputHash, Player storage player, Moves move) internal {
