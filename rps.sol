@@ -42,8 +42,10 @@ contract RockPaperScissors {
     }
     
     /*
-        Move format examples: rock123, paperabc, scissorsxyz999
-        Don't forget to prepend your hash with "0x" if needed
+        Move format:
+        - Description: first character must be int (1 for rock, 2 for paper, 3 for scissors). Add random stuff after
+        - Examples: "1aaa" (rock), "2999" (paper), 3a1b2c3 (scissors)
+        Don't forget to prepend your "moveHash" with "0x" if needed
     */
     function commit(bytes32 moveHash) external payable {
         
