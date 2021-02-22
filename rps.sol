@@ -6,7 +6,7 @@ contract RockPaperScissors {
     
     address payable constant private admin = payable(0xdD870fA1b7C4700F2BD7f44238821C26f7392148);
     
-    uint private bet;
+    uint public bet;
     
     uint private commitDeadline;
     
@@ -217,11 +217,6 @@ contract RockPaperScissors {
         
         // Refund Player
         payable(msg.sender).transfer(bet);
-    }
-    
-    // Anyone can view Bet
-    function viewBet() external view returns(uint) {
-        return bet;
     }
     
     // Anyone can view time left until Commit Deadline
