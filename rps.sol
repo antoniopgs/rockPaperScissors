@@ -124,12 +124,12 @@ contract RockPaperScissors {
                 getWinner();
             }
             
-        // If the Reveal Phase is over
+        // If the Reveal Phase is over...
         } else {
             
             /*
-                Either player can call getWinner() to get their money
-                getWinner() is prepared in case one or more players don't reveal
+                ... and if someone didn't reveal in time, either player can reveal() with dummy data to proceed with the game
+                getWinner() is prepared in case one or both players don't reveal
             */
             getWinner();
         }
