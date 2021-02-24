@@ -6,7 +6,7 @@ contract RockPaperScissors {
     
     address payable constant private admin = payable(0xdD870fA1b7C4700F2BD7f44238821C26f7392148);
     
-    uint public bet;
+    uint private bet;
     
     uint private commitDeadline;
     
@@ -216,20 +216,17 @@ contract RockPaperScissors {
         payable(msg.sender).transfer(bet);
     }
     
-    // Anyone can view time left until Commit Deadline
+    // View Time Left until Commit Deadline
     function viewCommitSecondsLeft() external view returns(uint) {
         
-        // Return seconds left until COmmit Deadline
+        // Return seconds left until Commit Deadline
         if (block.timestamp < commitDeadline) {return commitDeadline - block.timestamp;}
         else {return 0;}
     }
     
-    // Only valid players should be able to see time left until Reveal Deadline
+    // View Time Left until Reveal Deadline
     function viewRevealSecondsLeft() external view returns(uint) {
-        
-        // Validate viewer is Player 1 or Player 2
-        require(msg.sender == players[0].addr || msg.sender == players[1].addr, "Unauthorized");
-        
+
         // Return seconds left until Reveal Deadline
         if (block.timestamp < revealDeadline) {return revealDeadline - block.timestamp;}
         else {return 0;}
