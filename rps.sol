@@ -212,9 +212,6 @@ contract RockPaperScissors {
             require(players[0].commit == 0, "Player 1 has committed. Refund unauthorized.");
         }
         
-        // If only one Player has committed, contract balance should equal bet
-        assert(address(this).balance == bet);
-        
         // Refund Player
         payable(msg.sender).transfer(bet);
     }
