@@ -140,9 +140,9 @@ contract RockPaperScissors {
         
         // If it's a tie, or neither player reveals in time (both have their move = Moves.NONE)
         if (players[0].move == players[1].move) {
-            admin.transfer(address(this).balance / 100); // admin gets 1% fee
-            players[0].addr.transfer(address(this).balance / 2);
-            players[1].addr.transfer(address(this).balance);
+            admin.transfer((bet * 2) / 100); // admin gets 1% fee
+            players[0].addr.transfer((bet * 99) / 100);
+            players[1].addr.transfer((bet * 99) / 100);
         }
         
         // If only Player 1 fails to reveal in time, Player 2 wins
@@ -162,8 +162,8 @@ contract RockPaperScissors {
     }
     
     function payWinner(address payable _winner) internal {
-        admin.transfer(address(this).balance / 100); // admin gets 1% fee
-        _winner.transfer(address(this).balance);
+        admin.transfer((bet * 2) / 100); // admin gets 1% fee
+        _winner.transfer(((bet * 2) * 99) / 100);
     }
     
     // Transform enums to strings, to facilitate revealHash calculation
